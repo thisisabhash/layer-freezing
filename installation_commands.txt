@@ -1,0 +1,9 @@
+
+sudo apt update; sudo apt install python-pip; pip install numpy==1.13.1; pip install torch; sudo apt-get update --fix-missing ; sudo apt install python-pip ; pip install intel-numpy ; pip install torch==1.4.0+cpu torchvision==0.5.0+cpu -f https://download.pytorch.org/whl/torch_stable.html; pip install future; pip install torch; pip install numpy==1.13.1
+
+python abcd.py --master-ip tcp://10.10.1.1:6585 --epochs 50 --num-nodes 4 --rank 0 
+python abcd.py --master-ip tcp://10.10.1.1:6584 --epochs 50 --freezelayer 3 --num-nodes 4 --rank 0
+
+For grad norm freeze,
+python main.py --master-ip tcp://10.10.1.1:6584 --epochs 50 --gradnormfreeze 1 --freezelayer 1 --num-nodes 4 --rank 0
+
