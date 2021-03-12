@@ -1,1 +1,17 @@
-# layer-freezing
+# Can Limiting the Number of Layers Updated Help Accelerate Data-Parallel Fine-Tuning?
+
+With the growing complexity of Machine Learning models, large data sets and high training times, it becomes imperative to use distributed model training. This can be done with two different approaches - data parallel and model parallel. While the former splits the data set and concurrently trains the same model present on different nodes, the latter method focuses on splitting the model over different nodes and concurrently training all parts of the model using the entire data set. 
+
+The data parallel setting brings with it large network overheads in communicating computed gradients after every iteration to the parameter server and aggregating these values and updating the worker nodes again. For models with large number of layers, not all the weights in the inner layers are updated due to vanishing gradients. Thus, sending gradients for these layers to the parameters server, updating weights for those layers in the parameter server and sending the updated weights back to the worker nodes may introduce overheads both in terms of network load and latency. These can be enormous depending on the size of the model and the number of worker nodes used.
+
+The use of deep learning models for specialized applications has accelerated by the rapid adoption of fine-tuning and transfer learning. In transfer learning, we use a pre-trained model and train only the last few layers for our specialized application, while in fine-tuning we train the whole pre-trained model on the new dataset. As expected, the use of fine-tuning leads to a significantly faster convergence and computation time, primarily due to the transfer of common parts of the learning task from the pre-trained model. However, on the use of large models and datasets, even fine-tuning requires significant amount of time. For example, fine tuning BERT even on the relatively small IMDB dataset, takes around 3 hours on a single GPU.
+
+This strongly motivates us to experiment on ways to reduce training time by avoiding parts of the training that do not significantly improve accuracy, and to experiment on how we can avoid backward and forward passes in some parts of our data parallel training process. Essentially, if we have an n-layered model and we freeze upto the kth layer, then we would back-propagate the gradients to update the weights only from the nth layer uptil the kth layer, and the remaining weights would be left unchanged. 
+
+In this project as part of CS744 - Big Data Systems course at UW-Madison [Fall 2020], we have tried to demonstrate the benefits of avoiding gradient computation for certain layers (freezing) during fine-tuning and also tried to find the optimal layer [till where to freeze] through an adaptive algorithm. The results of the findings are present in the project report.
+
+## Note
+- We used CloudLab to setup multiple nodes to run distributed data parallel fine tuning.
+- Due to GPU resource constraints, we deployed 4 C8220 nodes on CloudLab and setup Python’s Pytorch library in CPU only mode on all 4 of these. These nodes contain Two Intel E5-2660 v2 10-core CPUs at 2.20 GHz and 256GB ECC Memory. Nodes 1, 2 and 3 are worker nodes. Node 0 serves as both the master node and the worker node.
+- ResNet18 was used on CIFAR-10 dataset for demonstration of benefits of freezing layers on model training.
+
